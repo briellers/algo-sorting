@@ -1,12 +1,9 @@
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
 import javax.swing.JButton;
 import javax.swing.JTextField;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JLabel;
 import java.awt.event.ActionListener;
@@ -18,64 +15,61 @@ import javax.swing.JTextArea;
 import java.awt.Font;
 import java.awt.Color;
 import javax.swing.SwingConstants;
-import javax.swing.JScrollPane;
 import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JScrollPane;
 
-public class MainMenu extends javax.swing.JFrame {
-
-	private javax.swing.JPanel contentPane;
-	private javax.swing.JButton btnAdd;
-	private JButton btnAdd_1;
-	private javax.swing.JButton btnDelete;
-	private JButton btnDelete_1;
-	private javax.swing.JButton btnClear;
-	private JButton btnClear_1;
-	private javax.swing.JTextField inputTextField;
-	private javax.swing.JLabel lblInputList;
-	private javax.swing.JLabel lblInputNumber;
-	private javax.swing.JButton btnSelectionSort;
-	private JButton btnSelectionSort_1;
-	private javax.swing.JButton btnBubbleSort;
-	private JButton btnBubbleSort_1;
+public class MainMenu extends JFrame {
+	
+	private boolean isDoingBubbleSort = false;
+	private boolean isDoingSelectionSort = false;
+	private boolean hasSorted = false;
+	private static JPanel contentPane;
+	private static JButton addButton;
+	private JButton deleteButton;
+	private JButton clearButton;
+	private JTextField inputTextField;
+	private JLabel lblInputList;
+	private JLabel lblInputNumber;
+	private JButton selectBtn;
+	private JButton bubbleBtn;
 	private JTextArea inputList;
-	private JTextArea sortedList;
+	private JRadioButton ascend;
+	private JRadioButton descend;
+    
+    private int[] inputs;
+    private static ArrayList <Integer> list = new ArrayList<>();
+    private int num;
+    private final ButtonGroup buttonGroup = new ButtonGroup();
     private JTextArea processList;
+    private JScrollPane sortedScroll;
+    private JTextArea sortedList;
+    private JTextArea sortInfo;
 	
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					MainMenu frame = new MainMenu();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+        java.awt.EventQueue.invokeLater(() -> new MainMenu().setVisible(true));
 	}
 
 	public MainMenu() {	
 		setTitle("Sorting Algorithms");
 		initComponents();
+		actionButtons();
 		disableKeyCharacters();
 	}
 	
-	private void disableKeyCharacters() 
-	{
-		
+	private void disableKeyCharacters() {		
 	        inputTextField.addKeyListener(new KeyAdapter() {
 	            @Override
 	            public void keyTyped(KeyEvent e) {
-	                if ((((e.getKeyChar() < '0') || (e.getKeyChar() > '9')) && (e.getKeyChar() != KeyEvent.VK_BACK_SPACE))) {
-	                    e.consume();
-	                }
+	            	if (e.getKeyCode()==KeyEvent.VK_ENTER){
+		                if ((((e.getKeyChar() < '0') || (e.getKeyChar() > '9')) && (e.getKeyChar() != KeyEvent.VK_BACK_SPACE))) {
+		                    e.consume();
+		                }
+	            	}
 	            }
 	        });
 	    }
 		
-	private int[] inputs;
-    private ArrayList <Integer> list = new ArrayList<>();
-    private int num;
     
 	private void initComponents() {
 		
@@ -86,19 +80,141 @@ public class MainMenu extends javax.swing.JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		
-		btnAdd = new JButton();
-		btnDelete = new JButton();
-		btnClear = new JButton();
-		btnSelectionSort= new JButton();
-		btnBubbleSort = new JButton();
+		addButton = new JButton("ADD");
+		deleteButton = new JButton("DELETE");
+		clearButton = new JButton("CLEAR");
+		bubbleBtn = new JButton("BUBBLE SORT");
+		inputTextField = new JTextField();
+		inputList = new JTextArea();
+		selectBtn = new JButton("SELECTION SORT");
 		
+		JLabel lblSorting = new JLabel("SORTING");
+		JLabel lblAlgorithms = new JLabel("ALGORITHMS");
+		JLabel lblProcess = new JLabel("SORTING PROCESS");
+		JLabel lblSortedValues = new JLabel("SORTED VALUES");
 		
-		btnAdd_1 = new JButton("ADD");
-		btnAdd_1.setForeground(new Color(255, 255, 255));
-		btnAdd_1.setBackground(new Color(224, 199, 192));
-		btnAdd_1.setFont(new Font("Arial Rounded MT Bold", Font.PLAIN, 11));
-		btnAdd_1.setBounds(10, 63, 105, 38);
-		btnAdd_1.addActionListener(new ActionListener() {
+		ascend = new JRadioButton("Ascending");
+		ascend.setSelected(true);
+		buttonGroup.add(ascend);
+		descend = new JRadioButton("Descending");
+		buttonGroup.add(descend);
+		
+		addButton.setForeground(new Color(255, 255, 255));
+		addButton.setBackground(new Color(224, 199, 192));
+		addButton.setFont(new Font("Arial Rounded MT Bold", Font.PLAIN, 11));
+		addButton.setBounds(10, 63, 105, 38);
+		
+		deleteButton.setForeground(new Color(255, 255, 255));
+		deleteButton.setBackground(new Color(224, 199, 192));
+		deleteButton.setFont(new Font("Arial Rounded MT Bold", Font.PLAIN, 11));
+		deleteButton.setBounds(10, 112, 105, 38);
+		
+		clearButton.setForeground(new Color(255, 255, 255));
+		clearButton.setBackground(new Color(224, 199, 192));
+		clearButton.setFont(new Font("Arial Rounded MT Bold", Font.PLAIN, 11));
+		clearButton.setBounds(10, 161, 105, 38);
+		
+		descend.setHorizontalAlignment(SwingConstants.RIGHT);
+		descend.setBackground(new Color(178, 216, 235));
+		descend.setBounds(328, 206, 92, 16);
+		
+		lblSortedValues.setHorizontalAlignment(SwingConstants.LEFT);
+		lblSortedValues.setBounds(10, 347, 118, 16);
+		
+		inputTextField.setForeground(new Color(255, 255, 255));
+		inputTextField.setBackground(new Color(130, 181, 202));
+		inputTextField.setBounds(125, 30, 295, 30);
+		inputTextField.setColumns(10);
+		
+		lblInputList = new JLabel("YOUR VALUES");
+		lblInputList.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblInputList.setBounds(125, 71, 295, 16);
+		
+		lblInputNumber = new JLabel("ENTER A NUMBER");
+		lblInputNumber.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblInputNumber.setBounds(125, 10, 295, 16);
+		
+		lblSorting.setForeground(new Color(255, 255, 255));
+		lblSorting.setHorizontalAlignment(SwingConstants.CENTER);
+		lblSorting.setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 17));
+		lblSorting.setBounds(10, 16, 105, 16);
+		
+		lblProcess.setHorizontalAlignment(SwingConstants.LEFT);
+		lblProcess.setBounds(10, 206, 118, 16);
+		
+		bubbleBtn.setBackground(new Color(245, 220, 213));
+		bubbleBtn.setForeground(new Color(112, 128, 144));
+		bubbleBtn.setBounds(280, 161, 140, 38);
+		
+		selectBtn.setBackground(new Color(245, 220, 213));
+		selectBtn.setForeground(new Color(112, 128, 144));
+		selectBtn.setBounds(125, 161, 140, 38);
+		
+		inputList.setForeground(new Color(255, 255, 255));
+		inputList.setBackground(new Color(96, 145, 150));
+		inputList.setEditable(false);
+		inputList.setBounds(125, 91, 295, 59);
+		
+		ascend.setHorizontalAlignment(SwingConstants.RIGHT);
+		ascend.setBackground(new Color(178, 216, 235));
+		ascend.setBounds(234, 206, 92, 16);
+		
+		lblAlgorithms.setForeground(new Color(255, 255, 255));
+		lblAlgorithms.setHorizontalAlignment(SwingConstants.CENTER);
+		lblAlgorithms.setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 15));
+		lblAlgorithms.setBounds(10, 34, 105, 16);
+		
+		contentPane.setLayout(null);
+		contentPane.add(addButton);		
+		contentPane.add(deleteButton);
+		contentPane.add(clearButton);				
+		contentPane.add(descend);				
+		contentPane.add(inputTextField);				
+		contentPane.add(lblInputList);				
+		contentPane.add(lblInputNumber);				
+		contentPane.add(selectBtn);				
+		contentPane.add(bubbleBtn);		
+		contentPane.add(lblSorting);		
+		contentPane.add(lblAlgorithms);		
+		contentPane.add(inputList);		
+		contentPane.add(lblProcess);		
+		contentPane.add(ascend);
+		contentPane.add(lblSortedValues);
+		
+		JScrollPane sortingScroll = new JScrollPane();
+		sortingScroll.setBounds(10, 228, 410, 108);
+		contentPane.add(sortingScroll);
+		
+		processList = new JTextArea();
+		processList.setEditable(false);
+		sortingScroll.setViewportView(processList);
+		
+		sortedScroll = new JScrollPane();
+		sortedScroll.setBounds(10, 366, 240, 54);
+		contentPane.add(sortedScroll);
+		
+		sortedList = new JTextArea();
+		sortedList.setEditable(false);
+		sortedList.setForeground(Color.WHITE);
+		sortedList.setBackground(new Color(96, 145, 150));
+		sortedScroll.setViewportView(sortedList);
+		
+		JLabel lblSortInformation = new JLabel("SORT INFORMATION");
+		lblSortInformation.setHorizontalAlignment(SwingConstants.LEFT);
+		lblSortInformation.setBounds(262, 347, 118, 16);
+		contentPane.add(lblSortInformation);
+		
+		JScrollPane sortScroll = new JScrollPane();
+		sortScroll.setBounds(262, 366, 158, 54);
+		contentPane.add(sortScroll);
+		
+		sortInfo = new JTextArea();
+		sortInfo.setEditable(false);
+		sortScroll.setViewportView(sortInfo);
+	}
+	
+	private void actionButtons(){
+		addButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(inputTextField.getText().isEmpty()) {	
 					JOptionPane.showMessageDialog(null, "You must enter a number", "Error", JOptionPane.ERROR_MESSAGE);
@@ -114,15 +230,8 @@ public class MainMenu extends javax.swing.JFrame {
 			
 			}
 		});
-		contentPane.setLayout(null);
-		contentPane.add(btnAdd_1);
 		
-		btnDelete_1 = new JButton("DELETE");
-		btnDelete_1.setForeground(new Color(255, 255, 255));
-		btnDelete_1.setBackground(new Color(224, 199, 192));
-		btnDelete_1.setFont(new Font("Arial Rounded MT Bold", Font.PLAIN, 11));
-		btnDelete_1.setBounds(10, 112, 105, 38);
-		btnDelete_1.addActionListener(new ActionListener() {
+		deleteButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				inputs = new int[list.size()];
 				 if(list.isEmpty())
@@ -143,124 +252,347 @@ public class MainMenu extends javax.swing.JFrame {
 		         }
 			}
 		});
-		contentPane.add(btnDelete_1);
 		
-		btnClear_1 = new JButton("CLEAR");
-		btnClear_1.setForeground(new Color(255, 255, 255));
-		btnClear_1.setBackground(new Color(224, 199, 192));
-		btnClear_1.setFont(new Font("Arial Rounded MT Bold", Font.PLAIN, 11));
-		btnClear_1.setBounds(10, 161, 105, 38);
-		btnClear_1.addActionListener(new ActionListener() {
+		clearButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				 if(inputList.getText().equals("")){
 		                JOptionPane.showMessageDialog(null, "List already empty", "Warning", JOptionPane.ERROR_MESSAGE);
 		            } else {
 		            	list.clear();
 		            	inputList.setText("");
+		            	sortedList.setText("");
+		            	processList.setText("");
+		            	sortInfo.setText("");
 		            	System.out.println(list);
 		            }
 				
 			}
 		});
-		contentPane.add(btnClear_1);
-		
-		inputTextField = new JTextField();
-		inputTextField.setForeground(new Color(255, 255, 255));
-		inputTextField.setBackground(new Color(130, 181, 202));
-		inputTextField.setBounds(125, 30, 295, 30);
-		contentPane.add(inputTextField);
-		inputTextField.setColumns(10);
-		
-		lblInputList = new JLabel("YOUR VALUES");
-		lblInputList.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblInputList.setBounds(125, 71, 295, 16);
-		contentPane.add(lblInputList);
-		
-		lblInputNumber = new JLabel("ENTER A NUMBER");
-		lblInputNumber.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblInputNumber.setBounds(125, 10, 295, 16);
-		contentPane.add(lblInputNumber);
-		
-		btnSelectionSort_1 = new JButton("SELECTION SORT");
-		btnSelectionSort_1.setBackground(new Color(245, 220, 213));
-		btnSelectionSort_1.setForeground(new Color(112, 128, 144));
-		btnSelectionSort_1.setBounds(125, 161, 140, 38);
-		btnSelectionSort_1.addActionListener(new ActionListener() {
+
+		selectBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				isDoingSelectionSort = true;
+				hasSorted = true;
+				processList.repaint();
+				System.out.print(list.size());
+	            inputs = new int[list.size()];
+	            
+	            for(Integer x : list){
+	                System.out.println(x + " ");
+	            }
+	            
+	            if(list.isEmpty()) {
+	                JOptionPane.showMessageDialog(null, "You must enter a number", "Error", JOptionPane.ERROR_MESSAGE);
+	            } else {
+	                for (int i = 0; i < list.size(); i++) {
+	                    inputs[i] = list.get(i);
+	                }
+	            }
 				
+				if (ascend.isSelected()) {
+					removeAll1();
+					selectionSort();
+				}
+				
+				else if (descend.isSelected()) {
+					removeAll1();	
+					descendSelectionSort();
+				}	
 			}
 		});
-		contentPane.add(btnSelectionSort_1);
 		
-		btnBubbleSort_1 = new JButton("BUBBLE SORT");
-		btnBubbleSort_1.addActionListener(new ActionListener() {
+		ascend.addActionListener(new ActionListener() {
+			@SuppressWarnings("unused")
 			public void actionPerformed(ActionEvent e) {
-				removeAll1();
-                bubbleSort();
-                
+				if (isDoingBubbleSort = false && hasSorted) { // bubble sort	
+					removeAll1();
+					bubbleSort();
+				} else if (isDoingSelectionSort = true && hasSorted) { // selection sort
+					removeAll1();
+					selectionSort();
+				}
 			}
 		});
-		btnBubbleSort_1.setBackground(new Color(245, 220, 213));
-		btnBubbleSort_1.setForeground(new Color(112, 128, 144));
-		btnBubbleSort_1.setBounds(280, 161, 140, 38);
-		contentPane.add(btnBubbleSort_1);
 		
-		JLabel lblSorting = new JLabel("SORTING");
-		lblSorting.setForeground(new Color(255, 255, 255));
-		lblSorting.setHorizontalAlignment(SwingConstants.CENTER);
-		lblSorting.setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 17));
-		lblSorting.setBounds(10, 16, 105, 16);
-		contentPane.add(lblSorting);
+		descend.addActionListener(new ActionListener() {
+			@SuppressWarnings("unused")
+			public void actionPerformed(ActionEvent e) {
+				if (isDoingBubbleSort = true && hasSorted) { // bubble sort	
+					removeAll1();
+					descendBubbleSort();
+				} else if (isDoingSelectionSort = false && hasSorted) { // selection sort
+					removeAll1();
+					descendSelectionSort();
+				}
+			}
+		});
 		
-		JLabel lblAlgorithms = new JLabel("ALGORITHMS");
-		lblAlgorithms.setForeground(new Color(255, 255, 255));
-		lblAlgorithms.setHorizontalAlignment(SwingConstants.CENTER);
-		lblAlgorithms.setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 15));
-		lblAlgorithms.setBounds(10, 34, 105, 16);
-		contentPane.add(lblAlgorithms);
-		inputList = new JTextArea();
-		inputList.setForeground(new Color(255, 255, 255));
-		inputList.setBackground(new Color(96, 145, 150));
-		inputList.setEditable(false);
-		inputList.setBounds(125, 91, 295, 59);
-		contentPane.add(inputList);
-		
-		JLabel lblProcess = new JLabel("SORTING PROCESS");
-		lblProcess.setHorizontalAlignment(SwingConstants.LEFT);
-		lblProcess.setBounds(10, 206, 118, 16);
-		contentPane.add(lblProcess);
-		
-		JRadioButton rdbtnAscending = new JRadioButton("Ascending");
-		rdbtnAscending.setHorizontalAlignment(SwingConstants.RIGHT);
-		rdbtnAscending.setBackground(new Color(178, 216, 235));
-		rdbtnAscending.setBounds(234, 206, 92, 16);
-		contentPane.add(rdbtnAscending);
-		
-		JRadioButton rdbtnDescending = new JRadioButton("Descending");
-		rdbtnDescending.setHorizontalAlignment(SwingConstants.RIGHT);
-		rdbtnDescending.setBackground(new Color(178, 216, 235));
-		rdbtnDescending.setBounds(328, 206, 92, 16);
-		contentPane.add(rdbtnDescending);
-		
-		JTextArea processList = new JTextArea();
-		processList.setFont(new Font("Monospaced", Font.PLAIN, 12));
-		processList.setEditable(false);
-		btnClear_1.setBackground(new Color(224, 199, 192));
-		processList.setBounds(10, 228, 410, 112);
-		contentPane.add(processList);
-		
-		JLabel lblSortedValues = new JLabel("SORTED VALUES");
-		lblSortedValues.setHorizontalAlignment(SwingConstants.LEFT);
-		lblSortedValues.setBounds(10, 347, 118, 16);
-		contentPane.add(lblSortedValues);
-		
-		JTextArea sortedList = new JTextArea();
-		sortedList.setFont(new Font("Monospaced", Font.PLAIN, 12));
-		sortedList.setEditable(false);
-		sortedList.setBackground(new Color(96, 145, 150));
-		sortedList.setBounds(10, 369, 410, 51);
-		contentPane.add(sortedList);
-		
+		bubbleBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				isDoingBubbleSort = true;
+				hasSorted = true;
+				processList.repaint();
+				System.out.print(list.size());
+	            inputs = new int[list.size()];
+	            
+	            for(Integer x : list){
+	                System.out.println(x + " ");
+	            }
+	            
+	            if(list.isEmpty()) {
+	                JOptionPane.showMessageDialog(null, "You must enter a number", "Error", JOptionPane.ERROR_MESSAGE);
+	            } else {
+	                for (int i = 0; i < list.size(); i++) {
+	                    inputs[i] = list.get(i);
+	                }
+	            }
+
+	            
+				if (ascend.isSelected()) {
+					removeAll1();
+					bubbleSort();
+				}
+				
+				else if (descend.isSelected()) {
+					removeAll1();
+					descendBubbleSort();				
+				}
+			}
+		});
 	}
 	
+	private void removeAll1(){
+        sortedList.setText("");
+        processList.setText("");
+        sortInfo.setText("");
+    }	
+	
+	private void bubbleSort(){
+		removeAll1();
+		
+		processList.append("Bubble Sort - Ascending\n\n");
+		
+        int[] bubbleArr = new int[list.size()];
+        int swaps = 0, comparisons = 0, passes = 0;
+        System.arraycopy(inputs, 0, bubbleArr, 0, inputs.length);
+
+        for(int i = 0; i < bubbleArr.length - 1; i++) {
+            if(i == 0)
+                processList.append("Pass #" + (i+1) + ": ");
+            else
+                processList.append("\nPass #" + (i+1) + ": ");
+            
+            for(int j = 0; j < bubbleArr.length - i - 1; j++) {
+            	comparisons++;
+                if (bubbleArr[j] > bubbleArr[j + 1]) {
+                	swaps++;
+                    int temp = bubbleArr[j];
+                    bubbleArr[j] = bubbleArr[j + 1];
+                    bubbleArr[j + 1] = temp;
+                }
+            }
+
+            for (int value : bubbleArr) {
+                processList.append(value + " ");
+            }
+
+            boolean isArranged = true;
+
+            for(int z = 0; z < bubbleArr.length; z++) {
+                if(z+1 < bubbleArr.length) {
+                    if(bubbleArr[z] > bubbleArr[z+1]) {
+                        isArranged = false;
+                        break;
+                    }
+                }
+            }
+            
+            if(isArranged){
+            	passes = i;
+                break;
+            }
+        }
+        
+        for (int input : bubbleArr) {
+            sortedList.append(input + " ");
+        }
+        
+        sortInfo.append("Passes: " + (passes+1));
+        sortInfo.append("\nSwaps: " + swaps);
+        sortInfo.append("\nComparisons: " + comparisons);
+    }
+	
+	private void descendBubbleSort() {
+		removeAll1();
+		
+		processList.append("Bubble Sort - Descending\n\n");
+
+        int[] descBubbleSort = new int[list.size()];
+        int swaps = 0, comparisons = 0, passes = 0;
+        System.arraycopy(inputs, 0, descBubbleSort, 0, inputs.length);
+
+        for(int i = 0; i < descBubbleSort.length - 1; i++){
+        	if(i == 0)
+                processList.append("Pass #" + (i+1) + ": ");
+            else
+                processList.append("\nPass #" + (i+1) + ": ");
+
+            for(int j = 0; j < descBubbleSort.length - i - 1; j++) {
+            	comparisons++;
+                if (descBubbleSort[j] < descBubbleSort[j + 1]) {
+                	swaps++;
+                    int temp = descBubbleSort[j];
+                    descBubbleSort[j] = descBubbleSort[j + 1];
+                    descBubbleSort[j + 1] = temp;
+                }
+            }
+
+            for (int value : descBubbleSort) {
+                processList.append(value + " ");
+            }
+
+            boolean isArranged = true;
+
+            for(int z = 0; z < descBubbleSort.length; z++) {
+                if(z+1 < descBubbleSort.length){
+                    if(descBubbleSort[z] < descBubbleSort[z+1]) {
+                        isArranged = false;
+                        break;
+                    }
+                }
+            }
+            if(isArranged){
+            	passes = i;
+                break;
+            }
+        }
+        for (int input : descBubbleSort) {
+        	sortedList.append(input + " ");
+        }
+        
+        sortInfo.append("Passes: " + (passes+1));
+        sortInfo.append("\nSwaps: " + swaps);
+        sortInfo.append("\nComparisons: " + comparisons);
+	}
+	
+	private void selectionSort() {
+		removeAll1();
+		
+		processList.append("Selection Sort - Ascending\n\n");
+		
+		int[] selectionArr = new int[list.size()];
+		int swaps = 0, comparisons = 0, passes = 0;
+        System.arraycopy(inputs,0, selectionArr, 0, inputs.length);
+
+        for(int i = 0; i < selectionArr.length - 1; i++){
+        	if(i == 0)
+                processList.append("Pass #" + (i+1) + ": ");
+            else
+                processList.append("\nPass #" + (i+1) + ": ");
+
+            int min_index = i;
+
+            for(int j = i + 1; j < selectionArr.length; j++) {
+            	comparisons++;
+                if (selectionArr[j] < selectionArr[min_index]) {
+                	swaps++;
+                    min_index = j;
+                }
+            }
+
+            int temp = selectionArr[min_index];
+            selectionArr[min_index] = selectionArr[i];
+            selectionArr[i] = temp;
+
+            for (int value : selectionArr) {
+                processList.append(value + " ");
+            }
+
+            boolean isArrange = true;
+
+            for(int z = 0; z < selectionArr.length; z++) {
+                if(z+1 < selectionArr.length){
+                    if(selectionArr[z] < selectionArr[z+1]) {
+                        isArrange = false;
+                        break;
+                    }
+                }
+            }
+
+            if(isArrange){
+            	break;
+            }
+            
+            passes = i;
+
+        }
+
+        for(int input : selectionArr){
+        	sortedList.append(input + " ");
+        }
+        
+        sortInfo.append("Passes: " + (passes+1));
+        sortInfo.append("\nSwaps: " + swaps);
+        sortInfo.append("\nComparisons: " + comparisons);
+	}
+	
+	private void descendSelectionSort() {
+		removeAll1();
+
+		processList.append("Selection Sort - Descending\n\n");
+        int[] selectionArr = new int[list.size()];
+        int swaps = 0, comparisons = 0, passes = 0;
+        System.arraycopy(inputs,0, selectionArr, 0, inputs.length);
+
+        for(int i = 0; i < selectionArr.length - 1; i++) {
+        	if(i == 0)
+                processList.append("Pass #" + (i+1) + ": ");
+            else
+                processList.append("\nPass #" + (i+1) + ": ");
+
+            int max_index = i;
+
+            for(int j = i + 1; j < selectionArr.length; j++) {
+            	comparisons++;
+                if (selectionArr[j] > selectionArr[max_index]) {
+                	swaps++;
+                    max_index = j;
+                }
+            }
+
+            int temp = selectionArr[max_index];
+            selectionArr[max_index] = selectionArr[i];
+            selectionArr[i] = temp;
+
+            for (int value : selectionArr) {
+                processList.append(value + " ");
+            }
+
+            boolean isArrange = true;
+
+            for(int z = 0; z < selectionArr.length; z++) {
+                if(z + 1 < selectionArr.length){
+                    if(selectionArr[z] > selectionArr[z+1]) {
+                        isArrange = false;
+                        break;
+                    }
+                }
+            }
+
+            if(isArrange){
+                break;
+            }
+            
+            passes = i;
+
+        }
+
+        for(int input : selectionArr){
+        	sortedList.append(input + " ");
+        }
+        
+        sortInfo.append("Passes: " + (passes+1));
+        sortInfo.append("\nSwaps: " + swaps);
+        sortInfo.append("\nComparisons: " + comparisons);
+	}
 }
